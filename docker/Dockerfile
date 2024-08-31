@@ -22,30 +22,44 @@ RUN apt-get update \
     && apt-get -qq -y clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN mkdir -p ${HOME} /app 
-COPY . /app/
-
-RUN chmod a+x /app/docker/scripts/*.sh \
-    && addgroup --system --gid ${USER_ID} ${USER_NAME} \
-    && useradd --system --no-log-init \
+RUN addgroup --system --gid ${USER_ID} ${USER_NAME} \
+    && useradd --system -m --no-log-init \
     --home-dir ${HOME} \
     --uid ${USER_ID} \
     --gid ${USER_NAME} \
-    --groups ${USER_NAME} ${USER_NAME} \
-    && chown -R ${USER_NAME}:${USER_NAME} /app /tmp ${HOME}
+    --groups ${USER_NAME} ${USER_NAME}
 
-USER ${USER_NAME}:${USER_NAME}
-RUN curl -sSL https://install.python-poetry.org | python3 -
-    
+RUN chown -R ${USER_NAME}:${USER_NAME} ${HOME} \
+    && mkdir -p /app /mlflow-artifact-store "${HOME}/.local/share" \
+    && chown -R ${USER_NAME}:${USER_NAME} /app /tmp /mlflow-artifact-store "${HOME}/.local" \
+    && curl -sSL https://install.python-poetry.org | python3 -
+
+USER ${USER_NAME}
+COPY pyproject.toml *.lock /app/
 WORKDIR /app
+
 RUN poetry config virtualenvs.create false \
     && python3.10 -m venv ${VIRTUAL_ENV} \
-    && pip install --upgrade pip setuptools \
-    && poetry install \
+    && poetry install --only main --no-interaction \
+    && poetry run pip install \
+    torch==2.0.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html \
     && cp poetry.lock ${BUILD_POETRY_LOCK} \
     && rm -rf ${HOME}/.cache/* \
-    && python3.10 -m nltk.downloader stopwords && python3.10 -m nltk.downloader punkt \
-    && git config --global user.email "rediate03@gmail.com" \
-    && git config --global user.name "jihoahn9303"
 
-CMD ["/app/docker/scripts/startup-script.sh"]
+# USER root    
+# COPY ./docker/scripts/* /docker/scripts/
+# RUN chmod a+x /docker/scripts/*.sh && chown -R ${USER_NAME}:${USER_NAME} /docker/scripts/*.sh
+
+# USER ${USER_NAME}
+# COPY . /app/
+
+# CMD ["/docker/scripts/startup-script.sh"]
+
+USER root    
+COPY --chown=${USER_NAME}:${USER_NAME} ./docker/scripts/* /docker/scripts/
+RUN chmod a+x /docker/scripts/*.sh
+
+USER ${USER_NAME}
+COPY . /app/
+
+CMD ["/docker/scripts/startup-script.sh"]

@@ -1,24 +1,51 @@
-version: "3.8"
 
-services:
-  app:
-    user: "${USER_ID:-1000}"
-    hostname: "${HOST_NAME:-jihoahn}"
-    image: cyberbullying-model
-    platform: linux/amd64
-    container_name: cyberbullying-model-container
-    build:
+
+x-app-template: &APP_TEMPLATE
+  user: "${USER_ID:-1000}"
+  hostname: "${HOST_NAME:-jihoahn}"
+  image: cyberbullying-model
+  build:
       context: .
       dockerfile: ./docker/Dockerfile
       args:
         USER_NAME: "${USER_NAME:-jihoahn}"
         USER_ID: "${USER_ID:-1000}"
-    volumes:
-      - ./:/app/
-      - ~/.config/gcloud/:/home/${USER_NAME:-jihoahn}/.config/gcloud
+  env_file:
+    - .envs/.postgres
+    - .envs/.mlflow-common
+    - .envs/.mlflow-dev
+  volumes:
+    - ./:/app/
+    - ~/.config/gcloud/:/home/${USER_NAME:-jihoahn}/.config/gcloud
+    - mlflow-cyberbullying-model-artifact-store:/mlflow-cyberbullying-model-artifact-store
+  ipc: host
+  init: true
+
+
+services:
+  mlflow-db:
+    container_name: mlflow-backend-store
+    image: postgres:14
+    env_file:
+      - .envs/.mlflow-common
+      - .envs/.mlflow-dev
+      - .envs/.postgres
+    volumes: 
+      - postgresql-mlflow-data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    profiles:
+      - dev
+    
+  app-dev: 
+    <<: *APP_TEMPLATE
+    container_name: cyberbullying-model-dev-container
+    env_file:
+      - .envs/.mlflow-common
+      - .envs/.mlflow-dev
     ports:
       - 8080:8080
-
+      - ${LOCAL_DEV_MLFLOW_SERVER_PORT}:${LOCAL_DEV_MLFLOW_SERVER_PORT}
     deploy:
       resources:
         reservations:
@@ -26,7 +53,31 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    ipc: host
-    init: true
+    profiles:
+      - dev
 
+  app-prod:
+    <<: *APP_TEMPLATE
+    container_name: cyberbullying-model-prod-container
+    env_file:
+      - .envs/.mlflow-common
+      - .envs/.mlflow-prod
+    ports:
+      - ${PROD_MLFLOW_SERVER_PORT}:${PROD_MLFLOW_SERVER_PORT}
+    profiles:
+      - prod
+  
+  app-ci:
+    <<: *APP_TEMPLATE
+    container_name: cyberbullying-model-ci-container
+    ports:
+      - ${LOCAL_DEV_MLFLOW_SERVER_PORT}:${LOCAL_DEV_MLFLOW_SERVER_PORT}
+    profiles:
+      - ci
+
+volumes:
+  mlflow-cyberbullying-model-artifact-store: 
+    driver: local
+  postgresql-mlflow-data:
+    driver: local
 
