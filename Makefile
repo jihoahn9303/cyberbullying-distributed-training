@@ -1,13 +1,12 @@
 # Make all targets .PHONY
 .PHONY: $(shell sed -n -e '/^$$/ { n ; /^[^ .\#][^ ]*:/ { s/:.*$$// ; p ; } ; }' $(MAKEFILE_LIST))
 
-include .envs/.postgres
-include .envs/.mlflow-common 
-include .envs/.mlflow-dev
-include .envs/.mlflow-prod
+include .envs/postgres.env
+include .envs/mlflow-common.env
+include .envs/mlflow-dev.env
 export 
 
-SHELL = /usr/bin/env bash
+SHELL := /usr/bin/env bash
 USER_NAME = $(shell whoami)
 USER_ID = $(shell id -u)
 HOST_NAME = $(shell hostname)
@@ -44,9 +43,13 @@ export
 guard-%:
 	@#$(or ${$*}, $(error $* is not set))
 
+## Generate final config. For overrides use: OVERRIDES=<overrides>
+generate-final-config-local: up
+	@$(DOCKER_COMPOSE_EXEC) python jeffrey/generate_final_config.py ${OVERRIDES}
+
 ## Run tasks
 local-run-tasks: up
-	$(DOCKER_COMPOSE_EXEC) python ./jeffrey/run.py
+	$(DOCKER_COMPOSE_EXEC) python jeffrey/run.py
 
 ## Starts jupyter lab
 notebook: up
@@ -105,10 +108,9 @@ lock-dependencies: build-for-dependencies
 ## Starts docker containers using "docker-compose up -d"
 up:
 ifeq (, $(shell docker ps -a | grep $(CONTAINER_NAME)))
-	@$(DOCKER_COMPOSE_COMMAND) --profile $(PROFILE) up -d --remove-orphans
-else
 	@make down
 endif
+	@$(DOCKER_COMPOSE_COMMAND) --profile $(PROFILE) up -d --remove-orphans
 
 ## docker-compose down
 down:

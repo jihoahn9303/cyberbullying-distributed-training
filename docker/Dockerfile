@@ -12,15 +12,16 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH="/app:${PYTHONPATH}" \
     BUILD_POETRY_LOCK="${HOME}/poetry.lock.build"
 
-RUN apt-get update \
+
+RUN apt-get -qq update \
     && apt-get -qq -y install vim gcc curl git build-essential libb64-dev software-properties-common \
-    && curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-462.0.1-linux-x86_64.tar.gz \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get -qq -y clean
+
+RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-462.0.1-linux-x86_64.tar.gz \
     && mkdir -p /usr/local/gcloud \
     && tar -C /usr/local/gcloud -zxvf google-cloud-cli-462.0.1-linux-x86_64.tar.gz \
-    && /usr/local/gcloud/google-cloud-sdk/install.sh --usage-reporting false --command-completion true --bash-completion true --path-update true --quiet \
-    && rm google-cloud-cli-462.0.1-linux-x86_64.tar.gz \
-    && apt-get -qq -y clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && /usr/local/gcloud/google-cloud-sdk/install.sh --usage-reporting false --command-completion true --bash-completion true --path-update true --quiet
 
 RUN addgroup --system --gid ${USER_ID} ${USER_NAME} \
     && useradd --system -m --no-log-init \
@@ -29,10 +30,10 @@ RUN addgroup --system --gid ${USER_ID} ${USER_NAME} \
     --gid ${USER_NAME} \
     --groups ${USER_NAME} ${USER_NAME}
 
-RUN chown -R ${USER_NAME}:${USER_NAME} ${HOME} \
-    && mkdir -p /app /mlflow-artifact-store "${HOME}/.local/share" \
-    && chown -R ${USER_NAME}:${USER_NAME} /app /tmp /mlflow-artifact-store "${HOME}/.local" \
-    && curl -sSL https://install.python-poetry.org | python3 -
+RUN chown -R ${USER_NAME}:${USER_NAME} ${HOME}
+RUN mkdir -p /app /mlflow-cyberbullying-artifact-store \
+    && chown -R ${USER_NAME}:${USER_NAME} /app /tmp /mlflow-cyberbullying-artifact-store
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
 USER ${USER_NAME}
 COPY pyproject.toml *.lock /app/
@@ -44,16 +45,7 @@ RUN poetry config virtualenvs.create false \
     && poetry run pip install \
     torch==2.0.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html \
     && cp poetry.lock ${BUILD_POETRY_LOCK} \
-    && rm -rf ${HOME}/.cache/* \
-
-# USER root    
-# COPY ./docker/scripts/* /docker/scripts/
-# RUN chmod a+x /docker/scripts/*.sh && chown -R ${USER_NAME}:${USER_NAME} /docker/scripts/*.sh
-
-# USER ${USER_NAME}
-# COPY . /app/
-
-# CMD ["/docker/scripts/startup-script.sh"]
+    && rm -rf ${HOME}/.cache/*
 
 USER root    
 COPY --chown=${USER_NAME}:${USER_NAME} ./docker/scripts/* /docker/scripts/

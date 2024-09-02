@@ -1,23 +1,26 @@
 
+volumes:
+  mlflow-cyberbullying-artifact-store:
+  postgresql-mlflow-data:
 
 x-app-template: &APP_TEMPLATE
   user: "${USER_ID:-1000}"
   hostname: "${HOST_NAME:-jihoahn}"
   image: cyberbullying-model
   build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-      args:
-        USER_NAME: "${USER_NAME:-jihoahn}"
-        USER_ID: "${USER_ID:-1000}"
+    context: .
+    dockerfile: ./docker/Dockerfile
+    args:
+      USER_NAME: "${USER_NAME:-jihoahn}"
+      USER_ID: "${USER_ID:-1000}"
   env_file:
-    - .envs/.postgres
-    - .envs/.mlflow-common
-    - .envs/.mlflow-dev
+    - .envs/postgres.env
+    - .envs/mlflow-common.env
+    - .envs/mlflow-dev.env
   volumes:
     - ./:/app/
     - ~/.config/gcloud/:/home/${USER_NAME:-jihoahn}/.config/gcloud
-    - mlflow-cyberbullying-model-artifact-store:/mlflow-cyberbullying-model-artifact-store
+    - mlflow-cyberbullying-artifact-store:/mlflow-cyberbullying-artifact-store
   ipc: host
   init: true
 
@@ -27,25 +30,30 @@ services:
     container_name: mlflow-backend-store
     image: postgres:14
     env_file:
-      - .envs/.mlflow-common
-      - .envs/.mlflow-dev
-      - .envs/.postgres
+      - .envs/mlflow-common.env
+      - .envs/mlflow-dev.env
+      - .envs/postgres.env
     volumes: 
       - postgresql-mlflow-data:/var/lib/postgresql/data
     ports:
       - 5433:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-U", "backend", "-d", "backend"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     profiles:
       - dev
     
   app-dev: 
     <<: *APP_TEMPLATE
     container_name: cyberbullying-model-dev-container
-    env_file:
-      - .envs/.mlflow-common
-      - .envs/.mlflow-dev
     ports:
       - 8080:8080
       - ${LOCAL_DEV_MLFLOW_SERVER_PORT}:${LOCAL_DEV_MLFLOW_SERVER_PORT}
+    depends_on:
+      mlflow-db:
+        condition: service_healthy
     deploy:
       resources:
         reservations:
@@ -60,8 +68,8 @@ services:
     <<: *APP_TEMPLATE
     container_name: cyberbullying-model-prod-container
     env_file:
-      - .envs/.mlflow-common
-      - .envs/.mlflow-prod
+      - .envs/mlflow-common.env
+      - .envs/mlflow-prod.env
     ports:
       - ${PROD_MLFLOW_SERVER_PORT}:${PROD_MLFLOW_SERVER_PORT}
     profiles:
@@ -75,9 +83,4 @@ services:
     profiles:
       - ci
 
-volumes:
-  mlflow-cyberbullying-model-artifact-store: 
-    driver: local
-  postgresql-mlflow-data:
-    driver: local
 
