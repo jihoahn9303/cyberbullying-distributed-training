@@ -31,15 +31,3 @@ def set_experiment(experiment_name: Optional[str] = None) -> None:
         pass
     finally:
         mlflow.set_experiment(experiment_name=experiment_name)
-    
-    # if mlflow.get_experiment_by_name(experiment_name) is not None:
-    #     print(f"Experiment {experiment_name} is already exists.")
-    #     pass
-    # else:
-    #     print(f"Creating new experiment {experiment_name}")
-    #     mlflow.create_experiment(
-    #         experiment_name,
-    #         artifact_location=MLFLOW_ARTIFACT_STORE
-    #     )
-
-    # mlflow.set_experiment(experiment_name)
