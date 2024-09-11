@@ -48,7 +48,7 @@ generate-final-config-local: up
 	@$(DOCKER_COMPOSE_EXEC) python jeffrey/generate_final_config.py ${OVERRIDES}
 
 ## Run tasks
-local-run-tasks: up
+local-run-tasks: generate-final-config-local
 	$(DOCKER_COMPOSE_EXEC) python jeffrey/run.py
 
 ## Starts jupyter lab

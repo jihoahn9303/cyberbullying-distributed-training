@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from omegaconf import MISSING
+from omegaconf import MISSING, SI
 from hydra.core.config_store import ConfigStore
 
 from jeffrey.config_schemas import transformations_schemas
@@ -28,6 +28,15 @@ class TextClassificationDataModuleConfig(DataModuleConfig):
     label_column_name: str = "label"
     transformation: transformations_schemas.TransformationConfig = MISSING
     
+
+@dataclass
+class ScrappedDataTextClassificationDataModuleConfig(TextClassificationDataModuleConfig):
+    batch_size: int = 64
+    train_df_path: str = "gs://jeffrey-data-versioning/data/processed/rebalanced_splits/train.parquet"
+    valid_df_path: str = "gs://jeffrey-data-versioning/data/processed/rebalanced_splits/valid.parquet"
+    test_df_path: str = "gs://jeffrey-data-versioning/data/processed/rebalanced_splits/test.parquet"
+    transformation: transformations_schemas.TransformationConfig = SI("${..lightning_module.model.backbone.transformation}")
+
     
 def register_config() -> None:
     transformations_schemas.register_config()

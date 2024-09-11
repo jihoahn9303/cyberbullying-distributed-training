@@ -45,7 +45,7 @@ class LightningScheduler(ABC):
 class CommonLightningScheduler(LightningScheduler):
     def configure_scheduler(self, optimizer: Optimizer, estimated_stepping_batches: Union[int, float]) -> Dict[str, Any]:
         return {
-            "scheduler": self.scheduler(optimizer),
+            "scheduler": self.scheduler(optimizer, estimated_stepping_batches),
             "interval": self.interval,
             "frequency": self.frequency,
             "monitor": self.monitor,

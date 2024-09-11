@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from omegaconf import SI
+from hydra.core.config_store import ConfigStore
 
 
 @dataclass
@@ -25,3 +26,12 @@ class InfrastructureConfig:
     zone: str = "asia-northeast3-c"
     # instance_group_creator: InstanceGroupCreatorConfig = InstanceGroupCreatorConfig()
     mlflow: MLFlowConfig = MLFlowConfig()
+    
+    
+def register_config() -> None:
+    cs = ConfigStore.instance()
+    cs.store(
+        name="infrastructure_schema",
+        group="infrastructure",
+        node=InfrastructureConfig
+    )

@@ -14,6 +14,12 @@ class HuggingFaceTokenizationTransformationConfig(TransformationConfig):
     pretrained_tokenizer_name_or_path: str = MISSING
     max_sequence_len: int = MISSING
     
+    
+@dataclass
+class CustomHuggingFaceTokenizationTransformationConfig(HuggingFaceTokenizationTransformationConfig):
+    pretrained_tokenizer_name_or_path: str = "gs://jeffrey-data-versioning/data/processed/rebalanced_splits/trained_tokenizer"
+    max_sequence_len: int = 100
+    
 
 def register_config() -> None:
     cs = ConfigStore.instance()

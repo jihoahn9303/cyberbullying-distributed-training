@@ -16,6 +16,12 @@ class SigmoidHeadConfig(HeadConfig):
     out_features: int = MISSING
     
 
+@dataclass
+class BinaryClassificationSigmoidHeadConfig(SigmoidHeadConfig):
+    in_features: int = 128
+    out_features: int = 1
+    
+
 def register_config() -> None:
     cs = ConfigStore.instance()
     cs.store(

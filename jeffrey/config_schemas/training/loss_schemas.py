@@ -9,7 +9,7 @@ class LossFunctionConfig:
     
     
 @dataclass
-class BCEWithLogitsLossConfig:
+class BCEWithLogitsLossConfig(LossFunctionConfig):
     _target_: str = "jeffrey.training.loss_functions.BCEWithLogitsLoss"
     reduction: str = "mean"
     

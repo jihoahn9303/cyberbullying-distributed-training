@@ -4,6 +4,7 @@ from lightning.pytorch import LightningModule
 from torch import Tensor
 from torch.optim import Optimizer
 
+from jeffrey.data_modules.transformations import Transformation
 from jeffrey.training.loss_functions import LossFunction
 from jeffrey.training.schedulers import LightningScheduler
 from jeffrey.models.models import Model
@@ -49,4 +50,8 @@ class TrainingLightningModule(LightningModule):
         
     @abstractmethod
     def validation_step(self, batch: Any, batch_idx: int) -> Tensor:
+        ...
+        
+    @abstractmethod
+    def get_transformation(self) -> Transformation:
         ...

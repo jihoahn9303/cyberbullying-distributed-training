@@ -14,6 +14,7 @@ class OptimizerConfig:
 @dataclass
 class AdamOptimizerConfig(OptimizerConfig):
     _target_: str = "torch.optim.Adam"
+    lr: float = 5e-3
     betas: tuple[float, float] = (0.9, 0.999)
     eps: float = 1e-8
     weight_decay: float = 0.0

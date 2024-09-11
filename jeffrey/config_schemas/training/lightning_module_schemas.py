@@ -1,7 +1,9 @@
-from dataclasses import MISSING, dataclass
+from dataclasses import dataclass
 from typing import Optional
 from hydra.core.config_store import ConfigStore
+from omegaconf import MISSING
 
+from jeffrey.config_schemas.base_schemas import LightningModuleConfig
 from jeffrey.config_schemas.models import model_schemas
 from jeffrey.config_schemas.training import (
     loss_schemas,
@@ -10,7 +12,7 @@ from jeffrey.config_schemas.training import (
 )
 
 @dataclass
-class TrainingLightningModuleConfig:
+class TrainingLightningModuleConfig(LightningModuleConfig):
     _target_: str = MISSING
     model: model_schemas.ModelConfig = MISSING
     loss: loss_schemas.LossFunctionConfig = MISSING
@@ -21,6 +23,14 @@ class TrainingLightningModuleConfig:
 @dataclass
 class BinaryTextClassificationTrainingLightningModuleConfig(TrainingLightningModuleConfig):
     _target_: str = "jeffrey.training.lightning_modules.binary_text_classification.BinaryTextClassificationLightningModule"
+    
+    
+@dataclass
+class DefaultBinaryTextClassificationTrainingLightningModuleConfig(BinaryTextClassificationTrainingLightningModuleConfig):
+    model: model_schemas.ModelConfig = model_schemas.BertTinyBinaryTextClassificationModelConfig()
+    loss: loss_schemas.LossFunctionConfig = loss_schemas.BCEWithLogitsLossConfig()
+    optimizer: optimizer_schemas.OptimizerConfig = optimizer_schemas.AdamWOptimizerConfig()
+    scheduler: Optional[scheduler_schemas.LightningSchedulerConfig] = scheduler_schemas.ReduceLROnPlateauLightningSchedulerConfig()
 
 
 def register_config() -> None:

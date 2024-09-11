@@ -8,6 +8,7 @@ from torchmetrics.classification import (
     BinaryConfusionMatrix
 )
 
+from jeffrey.data_modules.transformations import Transformation
 from jeffrey.models.models import Model
 from jeffrey.training.lightning_modules.bases import PartialOptimizerType, TrainingLightningModule
 from jeffrey.training.loss_functions import LossFunction
@@ -67,3 +68,6 @@ class BinaryTextClassificationLightningModule(TrainingLightningModule):
         self.log(name="validation_f1_score", value=self.validation_f1_score, on_step=False, on_epoch=True)
         
         return loss
+    
+    def get_transformation(self) -> Transformation:
+        return self.model.get_transformation()

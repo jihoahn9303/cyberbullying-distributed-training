@@ -1,4 +1,5 @@
 import itertools
+import os
 from typing import Any
 
 import matplotlib.pyplot as plt
@@ -36,3 +37,6 @@ def plot_confusion_matrix(confusion_matrix: Tensor, class_names: list[str]) -> A
     plt.tight_layout()
 
     return plt.gcf()
+
+def get_local_rank() -> int:
+    return int(os.getenv("LOCAL_RANK", -1))
