@@ -9,7 +9,7 @@ class PartialShedulerType(Protocol):
     def __call__(
         self,
         optimizer: Optimizer,
-        estimated_stepping_batches: Optional[Union[int, float]] = None
+        # estimated_stepping_batches: Optional[Union[int, float]] = None
     ) -> _LRScheduler:
         ...
 
@@ -45,7 +45,7 @@ class LightningScheduler(ABC):
 class CommonLightningScheduler(LightningScheduler):
     def configure_scheduler(self, optimizer: Optimizer, estimated_stepping_batches: Union[int, float]) -> Dict[str, Any]:
         return {
-            "scheduler": self.scheduler(optimizer, estimated_stepping_batches),
+            "scheduler": self.scheduler(optimizer=optimizer),
             "interval": self.interval,
             "frequency": self.frequency,
             "monitor": self.monitor,

@@ -55,7 +55,7 @@ class TrainerConfig:
 @dataclass
 class GPUDevConfig(TrainerConfig):
     max_epochs: int = 3
-    accelerator: str = "GPU"
+    accelerator: str = "cuda"  # auto, cpu, cuda, mps, tpu
     log_every_n_steps: int = 1
     limit_train_batches: float = 0.01
     limit_val_batches: float = 0.01

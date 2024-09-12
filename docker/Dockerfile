@@ -43,7 +43,7 @@ RUN poetry config virtualenvs.create false \
     && python3.10 -m venv ${VIRTUAL_ENV} \
     && poetry install --only main --no-interaction \
     && poetry run pip install \
-    torch==2.0.1+cu117 -f https://download.pytorch.org/whl/torch_stable.html \
+    torch==2.0.0+cu117 -f https://download.pytorch.org/whl/torch_stable.html \
     && cp poetry.lock ${BUILD_POETRY_LOCK} \
     && rm -rf ${HOME}/.cache/*
 

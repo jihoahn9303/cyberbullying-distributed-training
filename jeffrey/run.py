@@ -10,14 +10,7 @@ from jeffrey.utils.utils import get_logger
 
 
 @get_config(config_path="../configs/automatically_generated", config_name="config", to_object=False, return_dict_config=True)
-def entrypoint(config: Config) -> None:
-    # from omegaconf import OmegaConf
-    # print(60 * '#')
-    # print(OmegaConf.to_yaml(config))
-    # print(60 * '#')
-    
-    # exit(0)
-    
+def run_tasks(config: Config) -> None:
     logger = get_logger(name=__file__)
     assert config.infrastructure.mlflow.run_id is not None, "Run id has to be set for training task"
     
@@ -37,4 +30,4 @@ def entrypoint(config: Config) -> None:
         
 
 if __name__ == "__main__":
-    entrypoint()  # type: ignore
+    run_tasks()  # type: ignore

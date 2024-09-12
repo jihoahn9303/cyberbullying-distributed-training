@@ -49,7 +49,7 @@ generate-final-config-local: up
 
 ## Run tasks
 local-run-tasks: generate-final-config-local
-	$(DOCKER_COMPOSE_EXEC) python jeffrey/run.py
+	$(DOCKER_COMPOSE_EXEC) torchrun jeffrey/run.py
 
 ## Starts jupyter lab
 notebook: up

@@ -16,14 +16,14 @@ infrastructure:
   project_id: e2eml-jiho-430901
   zone: asia-northeast3-c
   mlflow:
-    mlflow_external_tracking_uri: localhost:6101
-    mlflow_internal_tracking_uri: localhost:6101
+    mlflow_external_tracking_uri: http://127.0.0.1:6101
+    mlflow_internal_tracking_uri: http://127.0.0.1:6101
     experiment_name: Default
     run_name: null
-    run_id: 749da4b9018548b18cd53ac57a92685d
+    run_id: 1f2522a9be7048369b2b12449d377623
     experiment_id: '0'
-    experiment_url: localhost:6101/#/experiments/0/runs/749da4b9018548b18cd53ac57a92685d
-    artifact_uri: /mlflow-cyberbullying-artifact-store/0/749da4b9018548b18cd53ac57a92685d/artifacts
+    experiment_url: http://127.0.0.1:6101/#/experiments/0/runs/1f2522a9be7048369b2b12449d377623
+    artifact_uri: /mlflow-cyberbullying-artifact-store/0/1f2522a9be7048369b2b12449d377623/artifacts
     block_mlflow: false
 save_last_checkpoint_every_n_train_steps: 50
 seed: 1234
@@ -113,7 +113,7 @@ tasks:
         name: null
     trainer:
       _target_: lightning.pytorch.trainer.trainer.Trainer
-      accelerator: GPU
+      accelerator: cuda
       strategy: ddp_find_unused_parameters_true
       devices: auto
       num_nodes: 1
@@ -122,15 +122,15 @@ tasks:
       - _target_: lightning.pytorch.loggers.mlflow.MLFlowLogger
         experiment_name: Default
         run_name: null
-        tracking_uri: localhost:6101
+        tracking_uri: http://127.0.0.1:6101
         tags: null
         save_dir: null
         prefix: ''
         artifact_location: null
-        run_id: 749da4b9018548b18cd53ac57a92685d
+        run_id: 1f2522a9be7048369b2b12449d377623
       callbacks:
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/749da4b9018548b18cd53ac57a92685d/artifacts/best-checkpoints/
+        dirpath: /mlflow-cyberbullying-artifact-store/0/1f2522a9be7048369b2b12449d377623/artifacts/best-checkpoints/
         filename: null
         monitor: validation_f1_score
         verbose: false
@@ -144,7 +144,7 @@ tasks:
         every_n_epochs: null
         save_on_train_epoch_end: null
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/749da4b9018548b18cd53ac57a92685d/artifacts/last-checkpoints/
+        dirpath: /mlflow-cyberbullying-artifact-store/0/1f2522a9be7048369b2b12449d377623/artifacts/last-checkpoints/
         filename: checkpoint-{epoch}
         monitor: null
         verbose: false
@@ -189,5 +189,5 @@ tasks:
       sync_batchnorm: true
       reload_dataloaders_every_n_epochs: 0
       default_root_dir: ./data/pytorch-lightning
-    best_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/749da4b9018548b18cd53ac57a92685d/artifacts/best-checkpoints/
-    last_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/749da4b9018548b18cd53ac57a92685d/artifacts/last-checkpoints/
+    best_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/1f2522a9be7048369b2b12449d377623/artifacts/best-checkpoints/
+    last_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/1f2522a9be7048369b2b12449d377623/artifacts/last-checkpoints/

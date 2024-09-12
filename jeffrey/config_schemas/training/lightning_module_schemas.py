@@ -34,10 +34,10 @@ class DefaultBinaryTextClassificationTrainingLightningModuleConfig(BinaryTextCla
 
 
 def register_config() -> None:
-    model_schemas.register_config()
-    loss_schemas.register_config()
-    optimizer_schemas.register_config()
-    scheduler_schemas.register_config()
+    # model_schemas.register_config()
+    # loss_schemas.register_config()
+    # optimizer_schemas.register_config()
+    # scheduler_schemas.register_config()
     
     cs = ConfigStore.instance()
     cs.store(

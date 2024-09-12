@@ -7,8 +7,8 @@ from hydra.core.config_store import ConfigStore
 
 @dataclass
 class MLFlowConfig:
-    mlflow_external_tracking_uri: str = SI("${oc.env:DEV_MLFLOW_TRACKING_URI,localhost:6101}")
-    mlflow_internal_tracking_uri: str = SI("${oc.env:DEV_MLFLOW_INTERNAL_TRACKING_URI,localhost:6101}")
+    mlflow_external_tracking_uri: str = SI("${oc.env:MLFLOW_TRACKING_URI,localhost:6101}")
+    mlflow_internal_tracking_uri: str = SI("${oc.env:MLFLOW_INTERNAL_TRACKING_URI,localhost:6101}")
     experiment_name: Optional[str] = "Default"
     run_name: Optional[str] = None
     run_id: Optional[str] = None
