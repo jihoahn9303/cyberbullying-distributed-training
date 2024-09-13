@@ -3,10 +3,15 @@ from typing import List, Literal, Optional
 from omegaconf import MISSING
 from hydra.core.config_store import ConfigStore
 
+from jeffrey.utils.mixins import LoggerbleParamsMixin
+
 
 @dataclass
-class AdapterConfig:
+class AdapterConfig(LoggerbleParamsMixin):
     _target_: str = MISSING
+    
+    def loggable_params(self) -> List[str]:
+        return ["_target_"]
     
 
 @dataclass
@@ -21,6 +26,17 @@ class MLPWithPoolingConfig(AdapterConfig):
     standardize_input: bool = True
     pooling_method: Optional[str] = None
     output_attribute_to_use: Optional[str] = None
+    
+    def loggable_params(self) -> List[str]:
+        return super().loggable_params() + [
+            "output_feature_sizes",
+            "biases",
+            "activation_funcs",
+            "dropout_rates",
+            "order",
+            "pooling_method",
+            "output_attribute_to_use"
+        ]
     
     
 @dataclass

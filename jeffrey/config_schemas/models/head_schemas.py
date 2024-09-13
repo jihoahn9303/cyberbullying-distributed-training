@@ -3,10 +3,15 @@ from typing import List, Literal, Optional
 from omegaconf import MISSING
 from hydra.core.config_store import ConfigStore
 
+from jeffrey.utils.mixins import LoggerbleParamsMixin
+
 
 @dataclass
-class HeadConfig:
+class HeadConfig(LoggerbleParamsMixin):
     _target_: str = MISSING
+    
+    def loggable_params(self) -> List[str]:
+        return ["_target_"]
     
 
 @dataclass

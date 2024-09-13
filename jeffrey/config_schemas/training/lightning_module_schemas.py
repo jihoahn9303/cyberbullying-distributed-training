@@ -10,14 +10,19 @@ from jeffrey.config_schemas.training import (
     optimizer_schemas,
     scheduler_schemas
 )
+from jeffrey.utils.mixins import LoggerbleParamsMixin
+
 
 @dataclass
-class TrainingLightningModuleConfig(LightningModuleConfig):
+class TrainingLightningModuleConfig(LightningModuleConfig, LoggerbleParamsMixin):
     _target_: str = MISSING
     model: model_schemas.ModelConfig = MISSING
     loss: loss_schemas.LossFunctionConfig = MISSING
     optimizer: optimizer_schemas.OptimizerConfig = MISSING
     scheduler: Optional[scheduler_schemas.LightningSchedulerConfig] = None
+    
+    def loggable_params(self) -> list[str]:
+        return ["_target_"]
     
 
 @dataclass

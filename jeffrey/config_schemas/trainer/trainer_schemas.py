@@ -1,14 +1,14 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-
 from hydra.core.config_store import ConfigStore
 
 from jeffrey.config_schemas.trainer import logger_schemas, callbacks_schemas
+from jeffrey.utils.mixins import LoggerbleParamsMixin
 
 
 @dataclass
-class TrainerConfig:
+class TrainerConfig(LoggerbleParamsMixin):
     _target_: str = "lightning.pytorch.trainer.trainer.Trainer"
     accelerator: str = "auto"
     strategy: str = "ddp_find_unused_parameters_true"

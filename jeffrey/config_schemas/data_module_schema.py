@@ -4,11 +4,12 @@ from typing import Any
 from omegaconf import MISSING, SI
 from hydra.core.config_store import ConfigStore
 
-from jeffrey.config_schemas import transformations_schemas
+from jeffrey.config_schemas.models import transformations_schemas
+from jeffrey.utils.mixins import LoggerbleParamsMixin
 
 
 @dataclass
-class DataModuleConfig:
+class DataModuleConfig(LoggerbleParamsMixin):
     _target_: str = MISSING
     batch_size: int = MISSING
     shuffle: bool = False
@@ -16,6 +17,9 @@ class DataModuleConfig:
     pin_memory: bool = True
     drop_last: bool = True
     persistent_workers: bool = False
+    
+    def loggable_params(self) -> list[str]:
+        return ["_target_", "batch_size"]
     
 
 @dataclass
