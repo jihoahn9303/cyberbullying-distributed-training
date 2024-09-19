@@ -12,7 +12,7 @@ from torch.utils.data import (
 )
 
 from jeffrey.data_modules.dataset import TextClassificationDataset
-from jeffrey.models.transformations import HuggingFaceTokenizationTransformation
+from jeffrey.models.transformations import HuggingFaceTokenizationTransformation, Transformation
 
 
 class DataModule(LightningDataModule):
@@ -56,7 +56,7 @@ class DataModule(LightningDataModule):
 
 
 class PartialDataModule(Protocol):
-    def __call__(self, transformation: HuggingFaceTokenizationTransformation) -> DataModule:
+    def __call__(self, transformation: Transformation) -> DataModule:
         ...
               
 
@@ -104,7 +104,8 @@ class TextClassificationDataModule(DataModule):
         self.label_column_name = label_column_name
         
     def setup(self, stage: Optional[str]) -> None:
-        if stage == "fit" or stage in None:
+        print(f"{stage=}")
+        if stage == "fit" or stage is None:
             self.train_dataset = TextClassificationDataset(
                 self.train_df_path,
                 self.text_column_name,

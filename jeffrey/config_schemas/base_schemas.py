@@ -7,7 +7,7 @@ from jeffrey.utils.mixins import LoggerbleParamsMixin
 
 
 @dataclass
-class LightningModuleConfig:
+class LightningModuleConfig(LoggerbleParamsMixin):
     _target_: str = MISSING
 
 

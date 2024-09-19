@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from jeffrey.config_schemas.config_schema import Config
 
 
-# @get_config(config_path="../configs", config_name="config", to_object=False, return_dict_config=True)
 @get_config_and_dict_config(config_path="../configs", config_name="config")
 def generate_final_config(config: "Config", dict_config: DictConfig):
     with activate_mlflow(
