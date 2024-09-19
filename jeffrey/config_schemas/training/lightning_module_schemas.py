@@ -36,14 +36,9 @@ class DefaultBinaryTextClassificationTrainingLightningModuleConfig(BinaryTextCla
     loss: loss_schemas.LossFunctionConfig = loss_schemas.BCEWithLogitsLossConfig()
     optimizer: optimizer_schemas.OptimizerConfig = optimizer_schemas.AdamWOptimizerConfig()
     scheduler: Optional[scheduler_schemas.LightningSchedulerConfig] = scheduler_schemas.ReduceLROnPlateauLightningSchedulerConfig()
-
+    
 
 def register_config() -> None:
-    # model_schemas.register_config()
-    # loss_schemas.register_config()
-    # optimizer_schemas.register_config()
-    # scheduler_schemas.register_config()
-    
     cs = ConfigStore.instance()
     cs.store(
         name="binary_text_classification_training_lightning_module_schema",

@@ -12,7 +12,7 @@ from torch.utils.data import (
 )
 
 from jeffrey.data_modules.dataset import TextClassificationDataset
-from jeffrey.data_modules.transformations import HuggingFaceTokenizationTransformation
+from jeffrey.models.transformations import HuggingFaceTokenizationTransformation
 
 
 class DataModule(LightningDataModule):

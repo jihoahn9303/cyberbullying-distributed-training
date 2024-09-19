@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from omegaconf import SI
+from omegaconf import MISSING, SI
 from hydra.core.config_store import ConfigStore
 
 from jeffrey.config_schemas.base_schemas import TaskConfig
@@ -10,8 +10,13 @@ from jeffrey.config_schemas.trainer import trainer_schemas
 
 @dataclass
 class TrainingTaskConfig(TaskConfig):
-    best_training_checkpoint: str = SI("${infrastructure.mlflow.artifact_uri}/best-checkpoints/")
-    last_training_checkpoint: str = SI("${infrastructure.mlflow.artifact_uri}/last-checkpoints/")
+    best_training_checkpoint: str = SI("${infrastructure.mlflow.artifact_uri}/best-checkpoints/last.ckpt")
+    last_training_checkpoint: str = SI("${infrastructure.mlflow.artifact_uri}/last-checkpoints/lask.ckpt")
+    
+    
+@dataclass
+class TarModelExportingTrainingConfig(TrainingTaskConfig):
+    tar_model_export_path: str = MISSING
     
 
 @dataclass
@@ -20,11 +25,13 @@ class CommonTrainingTaskConfig(TrainingTaskConfig):
     
 
 @dataclass
-class DefaultCommonTrainingTaskConfig(CommonTrainingTaskConfig):
+class DefaultCommonTrainingTaskConfig(TarModelExportingTrainingConfig):
+    _target_: str = "jeffrey.training.tasks.tar_model_exporting_training_task.TarModelExportingTrainingTask"
     task_name: str = "binary_text_classification_task"
     data_module: data_module_schema.DataModuleConfig = data_module_schema.ScrappedDataTextClassificationDataModuleConfig()
     lightning_module: lightning_module_schemas.TrainingLightningModuleConfig = lightning_module_schemas.DefaultBinaryTextClassificationTrainingLightningModuleConfig()
     trainer: trainer_schemas.TrainerConfig = trainer_schemas.GPUDevConfig()
+    tar_model_export_path: str = SI("${infrastructure.mlflow.artifact_uri}/exported_model.tar.gz")
 
 
 def register_config() -> None:

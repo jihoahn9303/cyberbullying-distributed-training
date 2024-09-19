@@ -3,7 +3,7 @@ from typing import Optional
 from torch import Tensor, nn
 from transformers import BatchEncoding
 
-from jeffrey.data_modules.transformations import Transformation
+from jeffrey.models.transformations import Transformation
 from jeffrey.models.adapters import Adapter
 from jeffrey.models.backbones import Backbone
 from jeffrey.models.heads import Head

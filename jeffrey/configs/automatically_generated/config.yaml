@@ -20,16 +20,16 @@ infrastructure:
     mlflow_internal_tracking_uri: http://127.0.0.1:6101
     experiment_name: Default
     run_name: null
-    run_id: c6995a32cdc444d59323ebe32f7b0d3c
+    run_id: a25c93c4fe7144d3ad59c2f9240936f5
     experiment_id: '0'
-    experiment_url: http://127.0.0.1:6101/#/experiments/0/runs/c6995a32cdc444d59323ebe32f7b0d3c
-    artifact_uri: /mlflow-cyberbullying-artifact-store/0/c6995a32cdc444d59323ebe32f7b0d3c/artifacts
+    experiment_url: http://127.0.0.1:6101/#/experiments/0/runs/a25c93c4fe7144d3ad59c2f9240936f5
+    artifact_uri: /mlflow-cyberbullying-artifact-store/0/a25c93c4fe7144d3ad59c2f9240936f5/artifacts
     block_mlflow: false
 save_last_checkpoint_every_n_train_steps: 50
 seed: 1234
 tasks:
   binary_text_classification_task:
-    _target_: jeffrey.training.tasks.common_training_task.CommonTrainingTask
+    _target_: jeffrey.training.tasks.tar_model_exporting_training_task.TarModelExportingTrainingTask
     task_name: binary_text_classification_task
     data_module:
       _target_: jeffrey.data_modules.data_modules.TextClassificationDataModule
@@ -45,7 +45,7 @@ tasks:
       text_column_name: cleaned_text
       label_column_name: label
       transformation:
-        _target_: jeffrey.data_modules.transformations.HuggingFaceTokenizationTransformation
+        _target_: jeffrey.models.transformations.HuggingFaceTokenizationTransformation
         pretrained_tokenizer_name_or_path: gs://jeffrey-data-versioning/data/processed/rebalanced_splits/trained_tokenizer
         max_sequence_len: 100
     lightning_module:
@@ -55,7 +55,7 @@ tasks:
         backbone:
           _target_: jeffrey.models.backbones.HuggingFaceBackbone
           transformation:
-            _target_: jeffrey.data_modules.transformations.HuggingFaceTokenizationTransformation
+            _target_: jeffrey.models.transformations.HuggingFaceTokenizationTransformation
             pretrained_tokenizer_name_or_path: gs://jeffrey-data-versioning/data/processed/rebalanced_splits/trained_tokenizer
             max_sequence_len: 100
           pretrained_model_name_or_path: prajjwal1/bert-tiny
@@ -127,10 +127,10 @@ tasks:
         save_dir: null
         prefix: ''
         artifact_location: null
-        run_id: c6995a32cdc444d59323ebe32f7b0d3c
+        run_id: a25c93c4fe7144d3ad59c2f9240936f5
       callbacks:
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/c6995a32cdc444d59323ebe32f7b0d3c/artifacts/best-checkpoints/
+        dirpath: /mlflow-cyberbullying-artifact-store/0/a25c93c4fe7144d3ad59c2f9240936f5/artifacts/best-checkpoints/
         filename: null
         monitor: validation_f1_score
         verbose: false
@@ -144,7 +144,7 @@ tasks:
         every_n_epochs: null
         save_on_train_epoch_end: null
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/c6995a32cdc444d59323ebe32f7b0d3c/artifacts/last-checkpoints/
+        dirpath: /mlflow-cyberbullying-artifact-store/0/a25c93c4fe7144d3ad59c2f9240936f5/artifacts/last-checkpoints/
         filename: checkpoint-{epoch}
         monitor: null
         verbose: false
@@ -189,5 +189,6 @@ tasks:
       sync_batchnorm: true
       reload_dataloaders_every_n_epochs: 0
       default_root_dir: ./data/pytorch-lightning
-    best_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/c6995a32cdc444d59323ebe32f7b0d3c/artifacts/best-checkpoints/
-    last_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/c6995a32cdc444d59323ebe32f7b0d3c/artifacts/last-checkpoints/
+    best_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/a25c93c4fe7144d3ad59c2f9240936f5/artifacts/best-checkpoints/last.ckpt
+    last_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/a25c93c4fe7144d3ad59c2f9240936f5/artifacts/last-checkpoints/lask.ckpt
+    tar_model_export_path: /mlflow-cyberbullying-artifact-store/0/a25c93c4fe7144d3ad59c2f9240936f5/artifacts/exported_model.tar.gz

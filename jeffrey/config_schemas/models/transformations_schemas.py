@@ -15,7 +15,7 @@ class TransformationConfig(LoggerbleParamsMixin):
     
 @dataclass
 class HuggingFaceTokenizationTransformationConfig(TransformationConfig):
-    _target_: str = "jeffrey.data_modules.transformations.HuggingFaceTokenizationTransformation"
+    _target_: str = "jeffrey.models.transformations.HuggingFaceTokenizationTransformation"
     pretrained_tokenizer_name_or_path: str = MISSING
     max_sequence_len: int = MISSING
     

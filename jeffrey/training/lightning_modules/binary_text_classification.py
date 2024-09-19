@@ -11,15 +11,15 @@ from torchmetrics.classification import (
     BinaryConfusionMatrix
 )
 
-from jeffrey.data_modules.transformations import Transformation
+from jeffrey.models.transformations import Transformation
 from jeffrey.models.models import Model
-from jeffrey.training.lightning_modules.bases import PartialOptimizerType, TrainingLightningModule
+from jeffrey.training.lightning_modules.bases import ModelStateDictExportingTrainingLightningModule, PartialOptimizerType
 from jeffrey.training.loss_functions import LossFunction
 from jeffrey.training.schedulers import LightningScheduler
 from jeffrey.utils.torch_utils import plot_confusion_matrix
 
 
-class BinaryTextClassificationLightningModule(TrainingLightningModule):
+class BinaryTextClassificationLightningModule(ModelStateDictExportingTrainingLightningModule):
     def __init__(
         self,
         model: Model,
@@ -103,3 +103,6 @@ class BinaryTextClassificationLightningModule(TrainingLightningModule):
     
     def get_transformation(self) -> Transformation:
         return self.model.get_transformation()
+    
+    def export_model_state_dict(self, checkpoint_path: str) -> str:
+        return self.common_export_model_state_dict(checkpoint_path)
