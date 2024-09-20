@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING, Union
 
 from lightning import Trainer
+from hydra.utils import instantiate
 
 from jeffrey.data_modules.data_modules import DataModule, PartialDataModule
 from jeffrey.evaluation.lightning_modules.bases import PartialEvaluationLightningModuleType
 from jeffrey.evaluation.tasks.bases import TarModelEvaluationTask
-from jeffrey.utils.mlflow_utils import activate_mlflow
+from jeffrey.utils.mlflow_utils import activate_mlflow, log_model
 
 if TYPE_CHECKING:
     from jeffrey.config_schemas.config_schema import Config 
@@ -40,3 +41,12 @@ class CommonEvaluationTask(TarModelEvaluationTask):
             run_name=run_name
         ) as _:
             self.trainer.test(model=self.lightning_module, datamodule=self.data_module)
+        
+        model_selector = instantiate(config.model_selector)
+        if model_selector is not None:
+            if model_selector.is_selected():
+                log_model(
+                    config.infrastructure.mlflow,
+                    model_selector.get_new_best_run_tag(),
+                    config.registered_model_name
+                )

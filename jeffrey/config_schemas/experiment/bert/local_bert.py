@@ -1,10 +1,11 @@
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, Optional
 from omegaconf import OmegaConf
 from hydra.core.config_store import ConfigStore
 
 from jeffrey.config_schemas.base_schemas import TaskConfig
 from jeffrey.config_schemas.config_schema import Config
+from jeffrey.config_schemas.evaluation import model_selector_schemas
 from jeffrey.config_schemas.evaluation.evaluation_task_schemas import DefaultCommonEvaluationTaskConfig
 from jeffrey.config_schemas.training.training_task_schemas import DefaultCommonTrainingTaskConfig
 
@@ -17,6 +18,8 @@ class LocalBertExperiment(Config):
             'binary_text_evaluation_task': DefaultCommonEvaluationTaskConfig()
         }
     )
+    model_selector: Optional[model_selector_schemas.ModelSelectorConfig] = model_selector_schemas.CyberBullyingDetectionModelSelectorConfig()
+    registered_model_name: Optional[str] = "bert_tiny"
     
 FinalLocalBertExperiment = OmegaConf.merge(
     LocalBertExperiment,

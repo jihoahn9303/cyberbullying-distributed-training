@@ -2,6 +2,7 @@ from abc import abstractmethod
 import os
 from typing import Any, Callable, Iterable, Optional, Union
 
+import mlflow
 import torch
 from lightning.pytorch import LightningModule
 from torch import Tensor
@@ -33,7 +34,21 @@ class TrainingLightningModule(LightningModule):
         self.partial_optimizer = optimizer
         self.scheduler = scheduler
         
+        self.model_size = self._calculate_model_size
         self.logging_logger = get_logger(self.__class__.__name__)
+    
+    def _calculate_model_size(self) -> float:
+        param_size = 0
+        for param in self.parameters():
+            param_size += param.nelement() * param.element_size()
+            
+        buffer_size = 0
+        for buffer in self.buffers():
+            buffer_size += buffer.nelement() * buffer.element_size()
+            
+        size_all_megabyte = (param_size + buffer_size) / 1024 ** 2
+        
+        return size_all_megabyte
     
     # https://lightning.ai/docs/pytorch/stable/_modules/lightning/pytorch/core/module.html#LightningModule.configure_optimizers    
     def configure_optimizers(self) -> Union[Optimizer, tuple[list[Optimizer], list[dict[str, Any]]]]:
@@ -48,6 +63,13 @@ class TrainingLightningModule(LightningModule):
         
         return optimizer
         
+    def on_train_end(self) -> None:
+        try:
+            mlflow.log_metric(key="model_size", value=self.model_size)
+        except Exception:
+            pass
+        return super().on_train_end()
+    
     @abstractmethod
     def training_step(self, batch: Any, batch_idx: int) -> Tensor:
         ...
