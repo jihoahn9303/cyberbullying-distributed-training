@@ -4,6 +4,7 @@
 include .envs/postgres.env
 include .envs/mlflow-common.env
 include .envs/mlflow-dev.env
+include .envs/infrastructure.env
 export 
 
 SHELL := /usr/bin/env bash
@@ -19,6 +20,7 @@ endif
 
 PROD_SERVICE_NAME = app-prod
 PROD_CONTAINER_NAME = cyberbullying-model-prod-container
+PROD_PROFILE_NAME = prod
 
 ifeq (, $(shell which nvidia-smi))
 	PROFILE = ci
@@ -37,17 +39,27 @@ DOCKER_COMPOSE_EXEC = $(DOCKER_COMPOSE_COMMAND) exec $(SERVICE_NAME)
 DOCKER_COMPOSE_RUN_PROD = $(DOCKER_COMPOSE_COMMAND) run --rm $(PROD_SERVICE_NAME)
 DOCKER_COMPOSE_EXEC_PROD = $(DOCKER_COMPOSE_COMMAND) exec $(PROD_SERVICE_NAME)
 
+IMAGE_TAG := $(shell echo "train-$$(uuidgen)")
+
 export
 
 # Returns true if the stem is a non-empty environment variable, or else raises an error.
 guard-%:
-	@#$(or ${$*}, $(error $* is not set))
+	@${${$*}:?Error: $* is not set}
+
+## Generate final config. For overrides use: OVERRIDES=<overrides>
+generate-final-config: up-prod
+	@$(DOCKER_COMPOSE_EXEC_PROD) python jeffrey/generate_final_config.py docker_image=${GCP_DOCKER_REGISTRY_URL}:${IMAGE_TAG} ${OVERRIDES}
 
 ## Generate final config. For overrides use: OVERRIDES=<overrides>
 generate-final-config-local: up
 	@$(DOCKER_COMPOSE_EXEC) python jeffrey/generate_final_config.py ${OVERRIDES}
 
 ## Run tasks
+run-tasks: generate-final-config push
+	$(DOCKER_COMPOSE_EXEC_PROD) python jeffrey/launch_job_on_gcp.py
+
+## Local Run tasks
 local-run-tasks: generate-final-config-local
 	$(DOCKER_COMPOSE_EXEC) torchrun jeffrey/run.py
 
@@ -112,6 +124,13 @@ ifeq (, $(shell docker ps -a | grep $(CONTAINER_NAME)))
 endif
 	@$(DOCKER_COMPOSE_COMMAND) --profile $(PROFILE) up -d --remove-orphans
 
+## Start production docker containers
+up-prod:
+ifeq (, $(shell docker ps -a | grep $(PROD_CONTAINER_NAME)))
+	@make down
+endif
+	@$(DOCKER_COMPOSE_COMMAND) --profile $(PROD_PROFILE_NAME) up -d --remove-orphans
+
 ## docker-compose down
 down:
 	$(DOCKER_COMPOSE_COMMAND) down
@@ -119,6 +138,15 @@ down:
 ## Open an interactive shell in docker container
 exec-in: up
 	docker exec -it $(CONTAINER_NAME) bash
+
+push: build
+	@gcloud auth configure-docker --quiet asia-northeast3-docker.pkg.dev
+	@docker tag "$${DOCKER_IMAGE_NAME}:latest" "$${GCP_DOCKER_REGISTRY_URL}:$${IMAGE_TAG}"
+	@docker push "$${GCP_DOCKER_REGISTRY_URL}:$${IMAGE_TAG}"
+
+## Run ssh tunnel for MLFlow
+mlflow-tunnel:
+	gcloud compute ssh "$${VM_NAME}" --zone "$${ZONE}" --tunnel-through-iap -- -N -L 6111:localhost:"$${PROD_MLFLOW_SERVER_PORT}"
 
 .DEFAULT_GOAL := help
 

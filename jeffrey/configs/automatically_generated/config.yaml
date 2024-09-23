@@ -14,16 +14,56 @@ hydra:
     dir: .
 infrastructure:
   project_id: e2eml-jiho-430901
-  zone: asia-northeast3-c
+  zone: europe-west4-b
+  region: europe-west4
+  instance_group_creator:
+    _target_: jeffrey.infrastructure.instance_group_creator.InstanceGroupCreator
+    instance_template_creator:
+      _target_: jeffrey.infrastructure.instance_template_creator.InstanceTemplateCreator
+      scopes:
+      - https://www.googleapis.com/auth/cloud-platform
+      - https://www.googleapis.com/auth/cloud.useraccounts.readonly
+      - https://www.googleapis.com/auth/cloudruntimeconfig
+      network: https://www.googleapis.com/compute/v1/projects/e2eml-jiho-430901/global/networks/default
+      subnetwork: https://www.googleapis.com/compute/v1/projects/e2eml-jiho-430901/regions/europe-west4/subnetworks/default
+      startup_script_path: scripts/vm_startup/task_runner_startup_script.sh
+      vm_config:
+        machine_type: n1-standard-8
+        accelerator_count: 1
+        accelerator_type: nvidia-tesla-t4
+        vm_type: STANDARD
+        disks: []
+      boot_disk_config:
+        project_id: deeplearning-platform-release
+        image_name: common-cu118-v20240730
+        size_gb: 50
+        labels:
+          project: e2eml-jiho-430901
+      vm_metadata_config:
+        zone: europe-west4-b
+        instance_group_name: job-20240923164303
+        node_count: 1
+        disks: []
+        docker_image: asia-northeast3-docker.pkg.dev/e2eml-jiho-430901/cyberbullying-detection-model/cyberbullying-model:train-7dc3b0b6-97b3-48ea-b232-aab09b19b756
+        mlflow_tracking_uri: http://e2eml-jiho-mlflow-asia-northeast3-c.c.e2eml-jiho-430901.internal:6100
+        python_hash_seed: 42
+      template_name: job-20240923164303
+      project_id: e2eml-jiho-430901
+      labels:
+        project: e2eml-jiho-430901
+    name: job-20240923164303
+    node_count: 1
+    project_id: e2eml-jiho-430901
+    zone: europe-west4-b
   mlflow:
-    mlflow_external_tracking_uri: http://127.0.0.1:6101
-    mlflow_internal_tracking_uri: http://127.0.0.1:6101
+    mlflow_external_tracking_uri: http://localhost:6100
+    mlflow_internal_tracking_uri: http://e2eml-jiho-mlflow-asia-northeast3-c.c.e2eml-jiho-430901.internal:6100
     experiment_name: Default
     run_name: null
-    run_id: d3a94948e3ae4050b11e03d4838eab61
+    run_id: 7c5c0d2491fe4a5588d8166e0ef78dca
     experiment_id: '0'
-    experiment_url: http://127.0.0.1:6101/#/experiments/0/runs/d3a94948e3ae4050b11e03d4838eab61
-    artifact_uri: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts
+    experiment_url: http://localhost:6100/#/experiments/0/runs/7c5c0d2491fe4a5588d8166e0ef78dca
+    artifact_uri: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts
     block_mlflow: false
 save_last_checkpoint_every_n_train_steps: 50
 seed: 1234
@@ -122,15 +162,15 @@ tasks:
       - _target_: lightning.pytorch.loggers.mlflow.MLFlowLogger
         experiment_name: Default
         run_name: null
-        tracking_uri: http://127.0.0.1:6101
+        tracking_uri: http://e2eml-jiho-mlflow-asia-northeast3-c.c.e2eml-jiho-430901.internal:6100
         tags: null
         save_dir: null
         prefix: ''
         artifact_location: null
-        run_id: d3a94948e3ae4050b11e03d4838eab61
+        run_id: 7c5c0d2491fe4a5588d8166e0ef78dca
       callbacks:
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/best-checkpoints/
+        dirpath: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/best-checkpoints/
         filename: null
         monitor: validation_f1_score
         verbose: false
@@ -144,7 +184,7 @@ tasks:
         every_n_epochs: null
         save_on_train_epoch_end: null
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/last-checkpoints/
+        dirpath: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/last-checkpoints/
         filename: checkpoint-{epoch}
         monitor: null
         verbose: false
@@ -189,9 +229,9 @@ tasks:
       sync_batchnorm: true
       reload_dataloaders_every_n_epochs: 0
       default_root_dir: ./data/pytorch-lightning
-    best_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/best-checkpoints/last.ckpt
-    last_training_checkpoint: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/last-checkpoints/lask.ckpt
-    tar_model_export_path: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/exported_model.tar.gz
+    best_training_checkpoint: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/best-checkpoints/last.ckpt
+    last_training_checkpoint: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/last-checkpoints/lask.ckpt
+    tar_model_export_path: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/exported_model.tar.gz
   binary_text_evaluation_task:
     _target_: jeffrey.evaluation.tasks.common_evaluation_task.CommonEvaluationTask
     task_name: binary_text_evaluation_task
@@ -226,15 +266,15 @@ tasks:
       - _target_: lightning.pytorch.loggers.mlflow.MLFlowLogger
         experiment_name: Default
         run_name: null
-        tracking_uri: http://127.0.0.1:6101
+        tracking_uri: http://e2eml-jiho-mlflow-asia-northeast3-c.c.e2eml-jiho-430901.internal:6100
         tags: null
         save_dir: null
         prefix: ''
         artifact_location: null
-        run_id: d3a94948e3ae4050b11e03d4838eab61
+        run_id: 7c5c0d2491fe4a5588d8166e0ef78dca
       callbacks:
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/best-checkpoints/
+        dirpath: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/best-checkpoints/
         filename: null
         monitor: validation_f1_score
         verbose: false
@@ -248,7 +288,7 @@ tasks:
         every_n_epochs: null
         save_on_train_epoch_end: null
       - _target_: lightning.pytorch.callbacks.ModelCheckpoint
-        dirpath: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/last-checkpoints/
+        dirpath: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/last-checkpoints/
         filename: checkpoint-{epoch}
         monitor: null
         verbose: false
@@ -293,10 +333,10 @@ tasks:
       sync_batchnorm: true
       reload_dataloaders_every_n_epochs: 0
       default_root_dir: ./data/pytorch-lightning
-    tar_model_path: /mlflow-cyberbullying-artifact-store/0/d3a94948e3ae4050b11e03d4838eab61/artifacts/exported_model.tar.gz
+    tar_model_path: gs://detect-cyberbullying/0/7c5c0d2491fe4a5588d8166e0ef78dca/artifacts/exported_model.tar.gz
 model_selector:
   _target_: jeffrey.evaluation.model_selector.ModelSelector
-  mlflow_run_id: d3a94948e3ae4050b11e03d4838eab61
+  mlflow_run_id: 7c5c0d2491fe4a5588d8166e0ef78dca
   must_be_better_metric_comparers:
     f1_score:
       _target_: jeffrey.evaluation.model_selector.MetricComparer
@@ -313,3 +353,4 @@ model_selector:
   to_be_thresholded_metric_comparers: {}
   threshold: 0.0
 registered_model_name: bert_tiny
+docker_image: asia-northeast3-docker.pkg.dev/e2eml-jiho-430901/cyberbullying-detection-model/cyberbullying-model:train-7dc3b0b6-97b3-48ea-b232-aab09b19b756

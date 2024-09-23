@@ -5,7 +5,7 @@ import mlflow
 from omegaconf import DictConfig
 
 from jeffrey.utils.config_utils import save_config_as_yaml, get_config_and_dict_config
-from jeffrey.utils.mlflow_utils import activate_mlflow, log_training_hparams
+from jeffrey.utils.mlflow_utils import activate_mlflow, log_artifacts_for_reproducibility, log_training_hparams
 
 if TYPE_CHECKING:
     from jeffrey.config_schemas.config_schema import Config
@@ -36,6 +36,7 @@ def generate_final_config(config: "Config", dict_config: DictConfig):
         mlflow.log_artifact(str(yaml_config_save_path))
         
         log_training_hparams(config)
+        log_artifacts_for_reproducibility()
 
 
 if __name__ == "__main__":

@@ -4,6 +4,8 @@ from typing import Optional
 from omegaconf import SI
 from hydra.core.config_store import ConfigStore
 
+from jeffrey.config_schemas.infrastructure.instance_group_creator_schemas import InstanceGroupCreatorConfig
+
 
 @dataclass
 class MLFlowConfig:
@@ -23,8 +25,9 @@ class MLFlowConfig:
 @dataclass
 class InfrastructureConfig:
     project_id: str = "e2eml-jiho-430901"
-    zone: str = "asia-northeast3-c"
-    # instance_group_creator: InstanceGroupCreatorConfig = InstanceGroupCreatorConfig()
+    zone: str = "asia-northeast1-a"
+    region: str = "asia-northeast1"
+    instance_group_creator: InstanceGroupCreatorConfig = InstanceGroupCreatorConfig()
     mlflow: MLFlowConfig = MLFlowConfig()
     
     
