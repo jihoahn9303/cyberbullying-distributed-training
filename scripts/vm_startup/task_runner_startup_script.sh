@@ -13,6 +13,7 @@ DISKS=$(curl --silent http://metadata.google.internal/computeMetadata/v1/instanc
 DOCKER_IMAGE=$(curl --silent --fail http://metadata.google.internal/computeMetadata/v1/instance/attributes/docker_image -H "Metadata-Flavor: Google")
 MLFLOW_TRACKING_URI=$(curl --silent http://metadata.google.internal/computeMetadata/v1/instance/attributes/mlflow_tracking_uri -H "Metadata-Flavor: Google")
 PYTHON_HASH_SEED=$(curl --silent --fail http://metadata.google.internal/computeMetadata/v1/instance/attributes/python_hash_seed -H "Metadata-Flavor: Google")
+ETCD_IP=$(curl --silent --fail http://metadata.google.internal/computeMetadata/v1/instance/attributes/etcd_ip -H "Metadata-Flavor: Google")
 
 INSTANCE_GROUP_NAME=$(echo ${INSTANCE_GROUP_NAME} | tr '[:upper:]' '[:lower:]')
 
@@ -26,14 +27,31 @@ gcloud auth configure-docker --quiet asia-northeast3-docker.pkg.dev
 time docker pull "${DOCKER_IMAGE}"
 
 echo "============= TRAINING: start ==============="
-docker run --init --rm --gpus all --ipc host --user root --hostname "$(hostname)" --privileged \
-    --log-driver=gcplogs \
-    -e PYTHONHASHSEED="${PYTHON_HASH_SEED}" \
-    -e MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI}" \
-    -e TOKENIZERS_PARALLELISM=false \
-    ${DOCKER_IMAGE} \
-    torchrun --nnodes="${NODE_COUNT}" --nproc_per_node='gpu' \
-    jeffrey/run.py || echo '================ TRAINING: job failed ==============='
+
+if [ "${ETCD_IP}" = "None" ]; then
+    docker run --init --rm --gpus all --ipc host --user root --hostname "$(hostname)" --privileged \
+        --log-driver=gcplogs \
+        -e PYTHONHASHSEED="${PYTHON_HASH_SEED}" \
+        -e MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI}" \
+        -e TOKENIZERS_PARALLELISM=false \
+        ${DOCKER_IMAGE} \
+        torchrun --nnodes="${NODE_COUNT}" --nproc_per_node='gpu' \
+        jeffrey/run.py || echo '================ TRAINING: job failed ==============='
+else
+    docker run --init --rm --gpus all --ipc host --user root --hostname "$(hostname)" --privileged \
+        --log-driver=gcplogs \
+        -e PYTHONHASHSEED="${PYTHON_HASH_SEED}" \
+        -e MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI}" \
+        -e TOKENIZERS_PARALLELISM=false \
+        ${DOCKER_IMAGE} \
+        torchrun \
+        --nnodes="${NODE_COUNT}" \
+        --nproc_per_node='gpu' \
+        --rdzv_id="${INSTANCE_GROUP_NAME}" \
+        --rdzv_backend=etcd-v2 \
+        --rdzv_endpoint="${ETCD_IP}" \
+        jeffrey/run.py || echo '================ TRAINING: job failed ==============='
+fi
 
 echo "============= Cleaning up ==============="
 gcloud compute instance-groups managed delete --quiet "${INSTANCE_GROUP_NAME}" --zone "${ZONE}"

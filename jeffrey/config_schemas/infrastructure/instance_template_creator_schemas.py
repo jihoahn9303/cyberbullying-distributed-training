@@ -17,9 +17,9 @@ class BootDiskConfig:
 
 @dataclass
 class VMConfig:
-    machine_type: str = "n1-standard-8"
+    machine_type: str = "g2-standard-8"
     accelerator_count: int = 1
-    accelerator_type: str = "nvidia-tesla-t4"
+    accelerator_type: str = "nvidia-l4"
     vm_type: VMType = VMType.STANDARD
     disks: list[str] = field(default_factory=lambda: [])
 
@@ -33,7 +33,7 @@ class VMMetadataConfig:
     docker_image: Optional[str] = SI("${docker_image}")
     mlflow_tracking_uri: str = SI("${infrastructure.mlflow.mlflow_internal_tracking_uri}")
     python_hash_seed: int = 42
-
+    etcd_ip: Optional[str] = SI("${infrastructure.etcd_ip}")
 
 
 @dataclass

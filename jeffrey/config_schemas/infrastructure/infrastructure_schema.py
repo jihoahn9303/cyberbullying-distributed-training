@@ -25,10 +25,11 @@ class MLFlowConfig:
 @dataclass
 class InfrastructureConfig:
     project_id: str = "e2eml-jiho-430901"
-    zone: str = "asia-northeast1-a"
-    region: str = "asia-northeast1"
+    zone: str = "asia-northeast3-a"
+    region: str = "asia-northeast3"
     instance_group_creator: InstanceGroupCreatorConfig = InstanceGroupCreatorConfig()
     mlflow: MLFlowConfig = MLFlowConfig()
+    etcd_ip: Optional[str] = "10.178.15.197:2379"
     
     
 def register_config() -> None:
