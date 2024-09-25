@@ -34,7 +34,7 @@ class TrainingLightningModule(LightningModule):
         self.partial_optimizer = optimizer
         self.scheduler = scheduler
         
-        self.model_size = self._calculate_model_size
+        self.model_size = self._calculate_model_size()
         self.logging_logger = get_logger(self.__class__.__name__)
     
     def _calculate_model_size(self) -> float:

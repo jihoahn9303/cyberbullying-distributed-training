@@ -68,6 +68,19 @@ class GPUDevConfig(TrainerConfig):
     ])
     
 
+@dataclass
+class GPUProdConfig(TrainerConfig):
+    max_epochs: int = 10
+    accelerator: str = "cuda"  # auto, cpu, cuda, mps, tpu
+    log_every_n_steps: int = 20
+    logger: Optional[list[logger_schemas.LoggerConfig]] = field(default_factory=lambda: [logger_schemas.MLFlowLoggerConfig()])
+    callbacks: Optional[list[callbacks_schemas.CallbackConfig]] = field(default_factory=lambda: [
+        callbacks_schemas.ValidationF1ScoreBestModelCheckpointConfig(),
+        callbacks_schemas.LastModelCheckpointConfig(),
+        callbacks_schemas.LearningRateMonitorConfig()
+    ])
+    
+
 def register_config() -> None:
     logger_schemas.register_config()
     callbacks_schemas.register_config()

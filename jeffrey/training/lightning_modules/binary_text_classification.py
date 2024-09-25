@@ -41,6 +41,11 @@ class BinaryTextClassificationLightningModule(ModelStateDictExportingTrainingLig
         self.training_step_outputs = defaultdict(list)
         self.validation_step_outputs = defaultdict(list)
         
+        self.pos_weight: Optional[Tensor] = None
+        
+    def set_pos_weight(self, pos_weight: Tensor) -> None:
+        self.pos_weight = pos_weight
+        
     def forward(self, texts: BatchEncoding) -> Tensor:
         return self.model(texts)
     
@@ -48,7 +53,8 @@ class BinaryTextClassificationLightningModule(ModelStateDictExportingTrainingLig
         texts, labels = batch
         logits = self(texts)  # (batch_size, 1)
         
-        loss = self.loss(logits, labels)
+        self.pos_weight = self.pos_weight.to(self.device)
+        loss = self.loss(logits, labels, pos_weight=self.pos_weight)
         self.log(name="loss", value=loss, sync_dist=True)
         
         self.training_accuracy(logits, labels)

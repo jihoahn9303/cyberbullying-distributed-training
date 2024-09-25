@@ -32,7 +32,8 @@ class AdamOptimizerConfig(OptimizerConfig):
 @dataclass
 class AdamWOptimizerConfig(AdamOptimizerConfig):
     _target_: str = "torch.optim.AdamW"
-
+    lr: float = 1e-6
+    weight_decay: float = 1e-2
 
 
 def register_config() -> None:
